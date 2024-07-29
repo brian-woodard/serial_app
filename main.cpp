@@ -137,8 +137,9 @@ int main(int, char**)
     int         parity = CSerialPort::NONE;
 
     // brightness command
-    uint8_t brt_cmd[3] = { 0xff, 0x03, 0x0 };
+    uint8_t brt_cmd[4] = { 0xff, 0x03, 0x0, 0x0 };
     int     lcd_backlight_control = 0;
+    int     lcd_backlight_control_1 = 0;
     bool    send = false;
 
     // Main loop
@@ -182,7 +183,7 @@ int main(int, char**)
 #endif
         ImGui::Begin("Serial", &show_window, ImGuiWindowFlags_NoTitleBar);
 
-        ImGui::Text("Serial Settings");
+        ImGui::SeparatorText("Serial Settings");
         if (ImGui::Button(port.IsConnected() ? "Disconnect" : "Connect"))
         {
            if (port.IsConnected())
@@ -234,12 +235,12 @@ int main(int, char**)
         ImGui::Combo("Parity", &parity, ParityStr, IM_ARRAYSIZE(ParityStr), IM_ARRAYSIZE(ParityStr));
 
         // brightness control
-        ImGui::Text("Brightness Control");
-        ImGui::Text("LCD Backlight Control Value");
-        if (ImGui::InputInt("Single Step", &lcd_backlight_control))
+        ImGui::SeparatorText("Brightness Control");
+        ImGui::SeparatorText("LCD Backlight Control Value Upper 8Bit (byte 3)");
+        if (ImGui::InputInt("Single Step##1", &lcd_backlight_control))
         {
-           if (lcd_backlight_control > 254)
-              lcd_backlight_control = 254;
+           if (lcd_backlight_control > 15)
+              lcd_backlight_control = 15;
            else if (lcd_backlight_control < 0)
               lcd_backlight_control = 0;
 
@@ -248,10 +249,10 @@ int main(int, char**)
            send = true;
         }
 
-        if (ImGui::InputInt("Step by 10", &lcd_backlight_control, 10))
+        if (ImGui::InputInt("Step by 10##1", &lcd_backlight_control, 10))
         {
-           if (lcd_backlight_control > 254)
-              lcd_backlight_control = 254;
+           if (lcd_backlight_control > 15)
+              lcd_backlight_control = 15;
            else if (lcd_backlight_control < 0)
               lcd_backlight_control = 0;
 
@@ -260,10 +261,10 @@ int main(int, char**)
            send = true;
         }
 
-        if (ImGui::InputInt("Hex Display", &lcd_backlight_control, 1, 100, ImGuiInputTextFlags_CharsHexadecimal))
+        if (ImGui::InputInt("Hex Display##1", &lcd_backlight_control, 1, 100, ImGuiInputTextFlags_CharsHexadecimal))
         {
-           if (lcd_backlight_control > 254)
-              lcd_backlight_control = 254;
+           if (lcd_backlight_control > 15)
+              lcd_backlight_control = 15;
            else if (lcd_backlight_control < 0)
               lcd_backlight_control = 0;
 
@@ -272,9 +273,52 @@ int main(int, char**)
            send = true;
         }
 
-        if (ImGui::SliderInt("##lcd_slider", &lcd_backlight_control, 0, 254))
+        if (ImGui::SliderInt("##lcd_slider_1", &lcd_backlight_control, 0, 15))
         {
            brt_cmd[2] = (uint8_t)lcd_backlight_control;
+           send = true;
+        }
+
+        ImGui::SeparatorText("LCD Backlight Control Value Lower 8Bit (byte 4)");
+        if (ImGui::InputInt("Single Step##2", &lcd_backlight_control_1))
+        {
+           if (lcd_backlight_control_1 > 254)
+              lcd_backlight_control_1 = 254;
+           else if (lcd_backlight_control_1 < 0)
+              lcd_backlight_control_1 = 0;
+
+           brt_cmd[3] = (uint8_t)lcd_backlight_control_1;
+
+           send = true;
+        }
+
+        if (ImGui::InputInt("Step by 10##2", &lcd_backlight_control_1, 10))
+        {
+           if (lcd_backlight_control_1 > 254)
+              lcd_backlight_control_1 = 254;
+           else if (lcd_backlight_control_1 < 0)
+              lcd_backlight_control_1 = 0;
+
+           brt_cmd[3] = (uint8_t)lcd_backlight_control_1;
+
+           send = true;
+        }
+
+        if (ImGui::InputInt("Hex Display##2", &lcd_backlight_control_1, 1, 100, ImGuiInputTextFlags_CharsHexadecimal))
+        {
+           if (lcd_backlight_control_1 > 254)
+              lcd_backlight_control_1 = 254;
+           else if (lcd_backlight_control_1 < 0)
+              lcd_backlight_control_1 = 0;
+
+           brt_cmd[3] = (uint8_t)lcd_backlight_control_1;
+
+           send = true;
+        }
+
+        if (ImGui::SliderInt("##lcd_slider_2", &lcd_backlight_control_1, 0, 254))
+        {
+           brt_cmd[3] = (uint8_t)lcd_backlight_control_1;
            send = true;
         }
 
